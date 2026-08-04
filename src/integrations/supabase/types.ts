@@ -14,7 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          station_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          station_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          station_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_status: {
+        Row: {
+          cng_available: boolean
+          diesel_available: boolean
+          id: string
+          petrol_available: boolean
+          power_status: boolean
+          queue_minutes: number | null
+          station_id: string
+          updated_at: string
+        }
+        Insert: {
+          cng_available?: boolean
+          diesel_available?: boolean
+          id?: string
+          petrol_available?: boolean
+          power_status?: boolean
+          queue_minutes?: number | null
+          station_id: string
+          updated_at?: string
+        }
+        Update: {
+          cng_available?: boolean
+          diesel_available?: boolean
+          id?: string
+          petrol_available?: boolean
+          power_status?: boolean
+          queue_minutes?: number | null
+          station_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_status_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: true
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          station_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          station_id: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          station_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stations: {
+        Row: {
+          city: string | null
+          close_time: string | null
+          company: string | null
+          created_at: string
+          fuel_types: string[]
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          open_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          close_time?: string | null
+          company?: string | null
+          created_at?: string
+          fuel_types?: string[]
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          open_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          close_time?: string | null
+          company?: string | null
+          created_at?: string
+          fuel_types?: string[]
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          open_time?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
