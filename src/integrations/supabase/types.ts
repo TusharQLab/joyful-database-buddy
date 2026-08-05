@@ -163,7 +163,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reset_demo_live_status: { Args: never; Returns: number }
+      simulate_station_activity: {
+        Args: { p_fraction?: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
