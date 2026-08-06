@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Fuel, Loader2, MailCheck } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Sign in to Fuelio — Live Fuel & CNG Availability" },
