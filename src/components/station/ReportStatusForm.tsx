@@ -65,18 +65,30 @@ function Segmented<T extends string>({
 }
 
 const DEFAULTS = {
-  fuel_status: "available" as FuelStatus,
   queue_status: "none" as QueueStatus,
   queue_minutes: "0",
   power_status: true,
   comment: "",
 };
 
+const FUELS = ["CNG", "Petrol", "Diesel"] as const;
+type Fuel = (typeof FUELS)[number];
+type FuelKey = Fuel | "All";
+
+/** Collapses per-fuel availability into the single fuel_status the database stores. */
+function combineFuelStatus(values: FuelStatus[]): FuelStatus {
+  if (values.length === 0) return "unavailable";
+  if (values.every((v) => v === "available")) return "available";
+  if (values.every((v) => v === "unavailable")) return "unavailable";
+  return "limited";
+}
+
 export function ReportStatusForm({ stationId }: { stationId: string }) {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
 
-  const [fuelStatus, setFuelStatus] = useState<FuelStatus>(DEFAULTS.fuel_status);
+  const [selectedFuels, setSelectedFuels] = useState<FuelKey[]>([]);
+  const [fuelStatuses, setFuelStatuses] = useState<Partial<Record<FuelKey, FuelStatus>>>({});
   const [queueStatus, setQueueStatus] = useState<QueueStatus>(DEFAULTS.queue_status);
   const [queueMinutes, setQueueMinutes] = useState(DEFAULTS.queue_minutes);
   const [powerStatus, setPowerStatus] = useState(DEFAULTS.power_status);
