@@ -65,18 +65,30 @@ function Segmented<T extends string>({
 }
 
 const DEFAULTS = {
-  fuel_status: "available" as FuelStatus,
   queue_status: "none" as QueueStatus,
   queue_minutes: "0",
   power_status: true,
   comment: "",
 };
 
+const FUELS = ["CNG", "Petrol", "Diesel"] as const;
+type Fuel = (typeof FUELS)[number];
+type FuelKey = Fuel | "All";
+
+/** Collapses per-fuel availability into the single fuel_status the database stores. */
+function combineFuelStatus(values: FuelStatus[]): FuelStatus {
+  if (values.length === 0) return "unavailable";
+  if (values.every((v) => v === "available")) return "available";
+  if (values.every((v) => v === "unavailable")) return "unavailable";
+  return "limited";
+}
+
 export function ReportStatusForm({ stationId }: { stationId: string }) {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
 
-  const [fuelStatus, setFuelStatus] = useState<FuelStatus>(DEFAULTS.fuel_status);
+  const [selectedFuels, setSelectedFuels] = useState<FuelKey[]>([]);
+  const [fuelStatuses, setFuelStatuses] = useState<Partial<Record<FuelKey, FuelStatus>>>({});
   const [queueStatus, setQueueStatus] = useState<QueueStatus>(DEFAULTS.queue_status);
   const [queueMinutes, setQueueMinutes] = useState(DEFAULTS.queue_minutes);
   const [powerStatus, setPowerStatus] = useState(DEFAULTS.power_status);
@@ -88,23 +100,38 @@ export function ReportStatusForm({ stationId }: { stationId: string }) {
 
   useEffect(() => {
     if (!latest || !isWithinEditWindow(latest)) return;
-    setFuelStatus(latest.fuel_status as FuelStatus);
+    setSelectedFuels(["All"]);
+    setFuelStatuses({ All: latest.fuel_status as FuelStatus });
     setQueueStatus(latest.queue_status as QueueStatus);
     setQueueMinutes(String(latest.queue_minutes ?? 0));
     setPowerStatus(latest.power_status);
     setComment(latest.comment ?? "");
   }, [latest]);
 
+  const toggleFuel = (fuel: FuelKey) => {
+    setSelectedFuels((prev) => {
+      if (fuel === "All") return prev.includes("All") ? [] : ["All"];
+      const base = prev.filter((f) => f !== "All");
+      const next = base.includes(fuel) ? base.filter((f) => f !== fuel) : [...base, fuel];
+      if (FUELS.every((f) => next.includes(f))) return ["All"];
+      return FUELS.filter((f) => next.includes(f));
+    });
+  };
+
+  const statusesForSelection = selectedFuels.map((f) => fuelStatuses[f]).filter(Boolean) as FuelStatus[];
+  const allChosen = selectedFuels.length > 0 && statusesForSelection.length === selectedFuels.length;
+
   const parsed = useMemo(
     () => ({
-      fuel_status: fuelStatus,
+      fuel_status: combineFuelStatus(statusesForSelection),
       queue_status: queueStatus,
       queue_minutes: queueMinutes.trim() === "" ? Number.NaN : Number(queueMinutes),
       power_status: powerStatus,
       comment,
     }),
-    [fuelStatus, queueStatus, queueMinutes, powerStatus, comment],
+    [statusesForSelection, queueStatus, queueMinutes, powerStatus, comment],
   );
+
 
   const mutation = useMutation({
     mutationFn: () => submitReport(stationId, reportSchema.parse(parsed)),
@@ -137,6 +164,15 @@ export function ReportStatusForm({ stationId }: { stationId: string }) {
     event.preventDefault();
     if (mutation.isPending) return;
 
+    if (selectedFuels.length === 0) {
+      setErrors({ fuel_status: "Select at least one fuel type." });
+      return;
+    }
+    if (!allChosen) {
+      setErrors({ fuel_status: "Choose availability for each selected fuel type." });
+      return;
+    }
+
     const result = reportSchema.safeParse(parsed);
     if (!result.success) {
       const next: Record<string, string> = {};
@@ -167,14 +203,45 @@ export function ReportStatusForm({ stationId }: { stationId: string }) {
         </div>
 
         <div className="space-y-4">
-          <Segmented
-            name="fuel_status"
-            label="Fuel availability"
-            value={fuelStatus}
-            options={FUEL_STATUS_OPTIONS}
-            onChange={setFuelStatus}
-          />
+          <fieldset>
+            <legend className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Available fuel types
+            </legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(["All", ...FUELS] as FuelKey[]).map((fuel) => {
+                const selected = selectedFuels.includes(fuel);
+                return (
+                  <button
+                    key={fuel}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={selected}
+                    onClick={() => toggleFuel(fuel)}
+                    className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                      selected
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:bg-accent"
+                    }`}
+                  >
+                    {fuel}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          {selectedFuels.map((fuel) => (
+            <Segmented
+              key={fuel}
+              name={`fuel_status_${fuel}`}
+              label={fuel === "All" ? "Availability (all fuels)" : `${fuel} availability`}
+              value={fuelStatuses[fuel] ?? ("" as FuelStatus)}
+              options={FUEL_STATUS_OPTIONS}
+              onChange={(value) => setFuelStatuses((prev) => ({ ...prev, [fuel]: value }))}
+            />
+          ))}
           {errors['fuel_status'] && <p className="text-xs text-destructive">{errors['fuel_status']}</p>}
+
 
           <Segmented
             name="queue_status"
