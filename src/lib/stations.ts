@@ -139,7 +139,11 @@ export async function fetchStationById(id: string): Promise<StationDetails | nul
     .eq("id", id)
     .maybeSingle();
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    // Malformed UUIDs should read as "not found", not a crash.
+    if (error.code === "22P02" || error.message.includes("invalid input syntax")) return null;
+    throw new Error(error.message);
+  }
   if (!data) return null;
 
   const status = data.live_status as unknown as LiveStatus | LiveStatus[] | null;
