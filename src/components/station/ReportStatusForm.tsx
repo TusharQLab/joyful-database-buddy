@@ -194,14 +194,45 @@ export function ReportStatusForm({ stationId }: { stationId: string }) {
         </div>
 
         <div className="space-y-4">
-          <Segmented
-            name="fuel_status"
-            label="Fuel availability"
-            value={fuelStatus}
-            options={FUEL_STATUS_OPTIONS}
-            onChange={setFuelStatus}
-          />
+          <fieldset>
+            <legend className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Available fuel types
+            </legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(["All", ...FUELS] as FuelKey[]).map((fuel) => {
+                const selected = selectedFuels.includes(fuel);
+                return (
+                  <button
+                    key={fuel}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={selected}
+                    onClick={() => toggleFuel(fuel)}
+                    className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                      selected
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-foreground hover:bg-accent"
+                    }`}
+                  >
+                    {fuel}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          {selectedFuels.map((fuel) => (
+            <Segmented
+              key={fuel}
+              name={`fuel_status_${fuel}`}
+              label={fuel === "All" ? "Availability (all fuels)" : `${fuel} availability`}
+              value={fuelStatuses[fuel] ?? ("" as FuelStatus)}
+              options={FUEL_STATUS_OPTIONS}
+              onChange={(value) => setFuelStatuses((prev) => ({ ...prev, [fuel]: value }))}
+            />
+          ))}
           {errors['fuel_status'] && <p className="text-xs text-destructive">{errors['fuel_status']}</p>}
+
 
           <Segmented
             name="queue_status"
