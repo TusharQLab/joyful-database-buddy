@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { Loader2, MapPinOff, TriangleAlert } from "lucide-react";
 import { stationsQueryOptions } from "@/lib/stations";
 
@@ -26,6 +27,7 @@ function MapLoading() {
 }
 
 export function MapPanel() {
+  const navigate = useNavigate();
   const { data, isPending, isError, error } = useQuery(stationsQueryOptions);
 
   if (isPending) return <MapLoading />;
@@ -59,7 +61,12 @@ export function MapPanel() {
   return (
     <ClientOnly fallback={<MapLoading />}>
       <Suspense fallback={<MapLoading />}>
-        <StationMap stations={data} />
+        <StationMap
+          stations={data}
+          onSelect={(stationId) =>
+            navigate({ to: "/station/$stationId", params: { stationId } })
+          }
+        />
       </Suspense>
     </ClientOnly>
   );

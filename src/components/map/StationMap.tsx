@@ -67,7 +67,16 @@ function markerIcon(color: string) {
   });
 }
 
-export default function StationMap({ stations }: { stations: StationWithStatus[] }) {
+export default function StationMap({
+  stations,
+  onSelect,
+}: {
+  stations: StationWithStatus[];
+  onSelect?: (stationId: string) => void;
+}) {
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
@@ -105,12 +114,14 @@ export default function StationMap({ stations }: { stations: StationWithStatus[]
     for (const station of stations) {
       const point: [number, number] = [station.latitude, station.longitude];
       points.push(point);
-      L.marker(point, {
+      const marker = L.marker(point, {
         icon: markerIcon(STATUS_COLORS[statusLevel(station)]),
         title: station.name,
       })
         .bindPopup(popupHtml(station), { closeButton: true, maxWidth: 260 })
         .addTo(layer);
+
+      marker.on("click", () => onSelectRef.current?.(station.id));
     }
 
     if (points.length) {
