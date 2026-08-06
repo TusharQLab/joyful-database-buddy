@@ -86,24 +86,42 @@ export type Database = {
       }
       reports: {
         Row: {
+          comment: string | null
           created_at: string
+          fuel_status: string
           id: string
+          power_status: boolean
+          queue_minutes: number | null
+          queue_status: string
           station_id: string
           status: string
+          updated_at: string
           user_id: string
         }
         Insert: {
+          comment?: string | null
           created_at?: string
+          fuel_status?: string
           id?: string
+          power_status?: boolean
+          queue_minutes?: number | null
+          queue_status?: string
           station_id: string
           status: string
+          updated_at?: string
           user_id: string
         }
         Update: {
+          comment?: string | null
           created_at?: string
+          fuel_status?: string
           id?: string
+          power_status?: boolean
+          queue_minutes?: number | null
+          queue_status?: string
           station_id?: string
           status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
