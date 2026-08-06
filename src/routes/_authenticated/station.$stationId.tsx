@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, MapPinOff, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StationDetailsCard } from "@/components/station/StationDetailsCard";
+import { ReportStatusForm } from "@/components/station/ReportStatusForm";
+
 import { stationQueryOptions } from "@/lib/stations";
 
 export const Route = createFileRoute("/_authenticated/station/$stationId")({
@@ -105,6 +107,8 @@ function StationDetailsPage() {
   return (
     <Shell>
       <StationDetailsCard station={data} />
+      <ReportStatusForm stationId={stationId} />
     </Shell>
   );
 }
+
