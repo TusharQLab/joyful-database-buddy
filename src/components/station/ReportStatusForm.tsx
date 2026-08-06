@@ -100,23 +100,38 @@ export function ReportStatusForm({ stationId }: { stationId: string }) {
 
   useEffect(() => {
     if (!latest || !isWithinEditWindow(latest)) return;
-    setFuelStatus(latest.fuel_status as FuelStatus);
+    setSelectedFuels(["All"]);
+    setFuelStatuses({ All: latest.fuel_status as FuelStatus });
     setQueueStatus(latest.queue_status as QueueStatus);
     setQueueMinutes(String(latest.queue_minutes ?? 0));
     setPowerStatus(latest.power_status);
     setComment(latest.comment ?? "");
   }, [latest]);
 
+  const toggleFuel = (fuel: FuelKey) => {
+    setSelectedFuels((prev) => {
+      if (fuel === "All") return prev.includes("All") ? [] : ["All"];
+      const base = prev.filter((f) => f !== "All");
+      const next = base.includes(fuel) ? base.filter((f) => f !== fuel) : [...base, fuel];
+      if (FUELS.every((f) => next.includes(f))) return ["All"];
+      return FUELS.filter((f) => next.includes(f));
+    });
+  };
+
+  const statusesForSelection = selectedFuels.map((f) => fuelStatuses[f]).filter(Boolean) as FuelStatus[];
+  const allChosen = selectedFuels.length > 0 && statusesForSelection.length === selectedFuels.length;
+
   const parsed = useMemo(
     () => ({
-      fuel_status: fuelStatus,
+      fuel_status: combineFuelStatus(statusesForSelection),
       queue_status: queueStatus,
       queue_minutes: queueMinutes.trim() === "" ? Number.NaN : Number(queueMinutes),
       power_status: powerStatus,
       comment,
     }),
-    [fuelStatus, queueStatus, queueMinutes, powerStatus, comment],
+    [statusesForSelection, queueStatus, queueMinutes, powerStatus, comment],
   );
+
 
   const mutation = useMutation({
     mutationFn: () => submitReport(stationId, reportSchema.parse(parsed)),
