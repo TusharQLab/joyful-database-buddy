@@ -105,6 +105,8 @@ function StationDetailsPage() {
   return (
     <Shell>
       <StationDetailsCard station={data} />
+      <ReportStatusForm stationId={stationId} />
     </Shell>
   );
 }
+
