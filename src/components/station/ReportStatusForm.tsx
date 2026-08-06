@@ -164,6 +164,15 @@ export function ReportStatusForm({ stationId }: { stationId: string }) {
     event.preventDefault();
     if (mutation.isPending) return;
 
+    if (selectedFuels.length === 0) {
+      setErrors({ fuel_status: "Select at least one fuel type." });
+      return;
+    }
+    if (!allChosen) {
+      setErrors({ fuel_status: "Choose availability for each selected fuel type." });
+      return;
+    }
+
     const result = reportSchema.safeParse(parsed);
     if (!result.success) {
       const next: Record<string, string> = {};
