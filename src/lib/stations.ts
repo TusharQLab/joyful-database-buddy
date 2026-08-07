@@ -128,7 +128,23 @@ export function formatRelativeTime(iso: string | null | undefined): string {
 export type StationDetails = StationWithStatus & {
   open_time: string | null;
   close_time: string | null;
+  /** Coarse fuel status from the most recent report, used only for "Limited" display. */
+  latest_report_fuel_status: string | null;
 };
+
+/** Fuel types the station permanently offers, normalised to CNG / Petrol / Diesel labels. */
+export function offeredFuels(station: StationWithStatus): string[] {
+  const canonical = ["CNG", "Petrol", "Diesel"];
+  return canonical.filter((f) =>
+    (station.fuel_types ?? []).some((t) => t.trim().toLowerCase() === f.toLowerCase()),
+  );
+}
+
+/** Fuels currently available AND permanently offered by the station. */
+export function availableOfferedFuels(station: StationWithStatus): string[] {
+  const available = new Set(availableFuels(station));
+  return offeredFuels(station).filter((f) => available.has(f));
+}
 
 export async function fetchStationById(id: string): Promise<StationDetails | null> {
   const { data, error } = await supabase
@@ -146,12 +162,21 @@ export async function fetchStationById(id: string): Promise<StationDetails | nul
   }
   if (!data) return null;
 
+  const { data: reportRows } = await supabase
+    .from("reports")
+    .select("fuel_status, created_at, updated_at")
+    .eq("station_id", id)
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
   const status = data.live_status as unknown as LiveStatus | LiveStatus[] | null;
   return {
     ...data,
     live_status: Array.isArray(status) ? (status[0] ?? null) : status,
+    latest_report_fuel_status: reportRows?.[0]?.fuel_status ?? null,
   } as StationDetails;
 }
+
 
 export const stationQueryOptions = (id: string) => ({
   queryKey: ["station", id] as const,
