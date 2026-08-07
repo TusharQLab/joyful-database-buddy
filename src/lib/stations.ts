@@ -125,6 +125,23 @@ export function formatRelativeTime(iso: string | null | undefined): string {
   return `${Math.round(hours / 24)} d ago`;
 }
 
+/** Friendly "Updated …" label: just now, 2 min ago, 1 hr ago, yesterday, 3 days ago. */
+export function formatUpdatedLabel(iso: string | null | undefined, now: number = Date.now()): string {
+  if (!iso) return "No data yet";
+  const ts = new Date(iso).getTime();
+  if (Number.isNaN(ts)) return "No data yet";
+  const mins = Math.max(0, Math.round((now - ts) / 60000));
+  if (mins < 1) return "Updated just now";
+  if (mins < 60) return `Updated ${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Updated ${hours} ${hours === 1 ? "hr" : "hrs"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Updated yesterday";
+  if (days < 7) return `Updated ${days} days ago`;
+  return `Updated on ${new Date(ts).toLocaleDateString()}`;
+}
+
+
 export type StationDetails = StationWithStatus & {
   open_time: string | null;
   close_time: string | null;
