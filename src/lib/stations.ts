@@ -125,10 +125,43 @@ export function formatRelativeTime(iso: string | null | undefined): string {
   return `${Math.round(hours / 24)} d ago`;
 }
 
+/** Friendly "Updated …" label: just now, 2 min ago, 1 hr ago, yesterday, 3 days ago. */
+export function formatUpdatedLabel(iso: string | null | undefined, now: number = Date.now()): string {
+  if (!iso) return "No data yet";
+  const ts = new Date(iso).getTime();
+  if (Number.isNaN(ts)) return "No data yet";
+  const mins = Math.max(0, Math.round((now - ts) / 60000));
+  if (mins < 1) return "Updated just now";
+  if (mins < 60) return `Updated ${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Updated ${hours} ${hours === 1 ? "hr" : "hrs"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Updated yesterday";
+  if (days < 7) return `Updated ${days} days ago`;
+  return `Updated on ${new Date(ts).toLocaleDateString()}`;
+}
+
+
 export type StationDetails = StationWithStatus & {
   open_time: string | null;
   close_time: string | null;
+  /** Coarse fuel status from the most recent report, used only for "Limited" display. */
+  latest_report_fuel_status: string | null;
 };
+
+/** Fuel types the station permanently offers, normalised to CNG / Petrol / Diesel labels. */
+export function offeredFuels(station: StationWithStatus): string[] {
+  const canonical = ["CNG", "Petrol", "Diesel"];
+  return canonical.filter((f) =>
+    (station.fuel_types ?? []).some((t) => t.trim().toLowerCase() === f.toLowerCase()),
+  );
+}
+
+/** Fuels currently available AND permanently offered by the station. */
+export function availableOfferedFuels(station: StationWithStatus): string[] {
+  const available = new Set(availableFuels(station));
+  return offeredFuels(station).filter((f) => available.has(f));
+}
 
 export async function fetchStationById(id: string): Promise<StationDetails | null> {
   const { data, error } = await supabase
@@ -146,12 +179,21 @@ export async function fetchStationById(id: string): Promise<StationDetails | nul
   }
   if (!data) return null;
 
+  const { data: reportRows } = await supabase
+    .from("reports")
+    .select("fuel_status, created_at, updated_at")
+    .eq("station_id", id)
+    .order("updated_at", { ascending: false })
+    .limit(1);
+
   const status = data.live_status as unknown as LiveStatus | LiveStatus[] | null;
   return {
     ...data,
     live_status: Array.isArray(status) ? (status[0] ?? null) : status,
+    latest_report_fuel_status: reportRows?.[0]?.fuel_status ?? null,
   } as StationDetails;
 }
+
 
 export const stationQueryOptions = (id: string) => ({
   queryKey: ["station", id] as const,

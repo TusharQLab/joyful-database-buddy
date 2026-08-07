@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import {
-  availableFuels,
-  formatRelativeTime,
+  availableOfferedFuels,
   formatTime,
+  formatUpdatedLabel,
+  offeredFuels,
   queueLabel,
   statusLevel,
   STATUS_COLORS,
@@ -32,11 +34,52 @@ function Row({
   );
 }
 
+function FuelList({
+  fuels,
+  limited,
+  empty,
+}: {
+  fuels: string[];
+  limited?: boolean;
+  empty: string;
+}) {
+  if (fuels.length === 0) return <span className="text-muted-foreground">{empty}</span>;
+  return (
+    <ul className="mt-1 space-y-1">
+      {fuels.map((fuel) => (
+        <li key={fuel} className="flex items-center gap-2">
+          <span
+            className="size-2 shrink-0 rounded-full"
+            style={{ backgroundColor: limited ? STATUS_COLORS.yellow : STATUS_COLORS.green }}
+            aria-hidden="true"
+          />
+          <span>
+            {fuel}
+            {limited ? <span className="text-muted-foreground"> (Limited)</span> : null}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Ticks once a minute so relative timestamps stay fresh while the page is open. */
+function useNowTicker(intervalMs = 30_000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return now;
+}
+
 export function StationDetailsCard({ station }: { station: StationDetails }) {
   const status = station.live_status;
   const level = statusLevel(station);
-  const fuels = availableFuels(station);
-  const supported = station.fuel_types?.length ? station.fuel_types.join(", ") : "—";
+  const offered = offeredFuels(station);
+  const availableNow = availableOfferedFuels(station);
+  const isLimited = station.latest_report_fuel_status === "limited";
+  const now = useNowTicker();
 
   return (
     <article className="mx-auto w-full max-w-2xl">
@@ -68,10 +111,27 @@ export function StationDetailsCard({ station }: { station: StationDetails }) {
           <Row icon={<MapPin className="size-4" />} label="City" value={station.city || "—"} />
           <Row
             icon={<Fuel className="size-4" />}
-            label="Available now"
-            value={fuels.length ? fuels.join(", ") : "None right now"}
+            label="Fuel types offered"
+            value={
+              offered.length ? (
+                <ul className="mt-1 space-y-1">
+                  {offered.map((fuel) => (
+                    <li key={fuel} className="flex items-center gap-2">
+                      <span className="size-1.5 shrink-0 rounded-full bg-muted-foreground" aria-hidden="true" />
+                      {fuel}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                "—"
+              )
+            }
           />
-          <Row icon={<Fuel className="size-4" />} label="Fuel types offered" value={supported} />
+          <Row
+            icon={<Fuel className="size-4" />}
+            label="Available now"
+            value={<FuelList fuels={availableNow} limited={isLimited} empty="None right now" />}
+          />
           <Row icon={<Clock className="size-4" />} label="Opening time" value={formatTime(station.open_time)} />
           <Row icon={<Clock className="size-4" />} label="Closing time" value={formatTime(station.close_time)} />
           <Row
@@ -95,7 +155,7 @@ export function StationDetailsCard({ station }: { station: StationDetails }) {
         </dl>
 
         <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
-          {status ? `Last updated ${formatRelativeTime(status.updated_at)}` : "No live status reported yet"}
+          {status ? formatUpdatedLabel(status.updated_at, now) : "No live status reported yet"}
         </p>
       </div>
     </article>
