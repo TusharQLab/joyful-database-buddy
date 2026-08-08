@@ -36,17 +36,15 @@ function Row({
 
 function FuelList({
   fuels,
-  limited,
   empty,
 }: {
-  fuels: string[];
-  limited?: boolean;
+  fuels: { fuel: string; limited: boolean }[];
   empty: string;
 }) {
   if (fuels.length === 0) return <span className="text-muted-foreground">{empty}</span>;
   return (
     <ul className="mt-1 space-y-1">
-      {fuels.map((fuel) => (
+      {fuels.map(({ fuel, limited }) => (
         <li key={fuel} className="flex items-center gap-2">
           <span
             className="size-2 shrink-0 rounded-full"
@@ -62,6 +60,7 @@ function FuelList({
     </ul>
   );
 }
+
 
 /** Ticks once a minute so relative timestamps stay fresh while the page is open. */
 function useNowTicker(intervalMs = 30_000) {
