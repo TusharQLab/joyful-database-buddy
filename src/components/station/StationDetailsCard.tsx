@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import {
-  availableOfferedFuels,
   formatTime,
   formatUpdatedLabel,
+  liveFuelAvailability,
   offeredFuels,
   queueLabel,
   statusLevel,
@@ -10,6 +10,7 @@ import {
   STATUS_LABELS,
   type StationDetails,
 } from "@/lib/stations";
+
 import { Clock, Building2, MapPin, Zap, ZapOff, Users, Fuel } from "lucide-react";
 
 function Row({
@@ -36,17 +37,15 @@ function Row({
 
 function FuelList({
   fuels,
-  limited,
   empty,
 }: {
-  fuels: string[];
-  limited?: boolean;
+  fuels: { fuel: string; limited: boolean }[];
   empty: string;
 }) {
   if (fuels.length === 0) return <span className="text-muted-foreground">{empty}</span>;
   return (
     <ul className="mt-1 space-y-1">
-      {fuels.map((fuel) => (
+      {fuels.map(({ fuel, limited }) => (
         <li key={fuel} className="flex items-center gap-2">
           <span
             className="size-2 shrink-0 rounded-full"
@@ -63,6 +62,7 @@ function FuelList({
   );
 }
 
+
 /** Ticks once a minute so relative timestamps stay fresh while the page is open. */
 function useNowTicker(intervalMs = 30_000) {
   const [now, setNow] = useState(() => Date.now());
@@ -77,9 +77,9 @@ export function StationDetailsCard({ station }: { station: StationDetails }) {
   const status = station.live_status;
   const level = statusLevel(station);
   const offered = offeredFuels(station);
-  const availableNow = availableOfferedFuels(station);
-  const isLimited = station.latest_report_fuel_status === "limited";
+  const availableNow = liveFuelAvailability(station);
   const now = useNowTicker();
+
 
   return (
     <article className="mx-auto w-full max-w-2xl">
@@ -130,7 +130,7 @@ export function StationDetailsCard({ station }: { station: StationDetails }) {
           <Row
             icon={<Fuel className="size-4" />}
             label="Available now"
-            value={<FuelList fuels={availableNow} limited={isLimited} empty="None right now" />}
+            value={<FuelList fuels={availableNow} empty="None right now" />}
           />
           <Row icon={<Clock className="size-4" />} label="Opening time" value={formatTime(station.open_time)} />
           <Row icon={<Clock className="size-4" />} label="Closing time" value={formatTime(station.close_time)} />

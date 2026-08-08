@@ -114,10 +114,18 @@ export function formatTime(value: string | null): string {
   return `${display}:${m ?? "00"} ${suffix}`;
 }
 
+/** Parses a Postgres/Supabase timestamp, treating a zone-less value as UTC. */
+export function parseTimestamp(iso: string | null | undefined): number | null {
+  if (!iso) return null;
+  const hasZone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(iso.trim());
+  const ts = new Date(hasZone ? iso : `${iso.trim().replace(" ", "T")}Z`).getTime();
+  return Number.isNaN(ts) ? null : ts;
+}
+
 export function formatRelativeTime(iso: string | null | undefined): string {
-  if (!iso) return "No data";
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.max(0, Math.round(diff / 60000));
+  const ts = parseTimestamp(iso);
+  if (ts === null) return "No data";
+  const mins = Math.max(0, Math.round((Date.now() - ts) / 60000));
   if (mins < 1) return "just now";
   if (mins < 60) return `${mins} min ago`;
   const hours = Math.round(mins / 60);
@@ -127,9 +135,8 @@ export function formatRelativeTime(iso: string | null | undefined): string {
 
 /** Friendly "Updated …" label: just now, 2 min ago, 1 hr ago, yesterday, 3 days ago. */
 export function formatUpdatedLabel(iso: string | null | undefined, now: number = Date.now()): string {
-  if (!iso) return "No data yet";
-  const ts = new Date(iso).getTime();
-  if (Number.isNaN(ts)) return "No data yet";
+  const ts = parseTimestamp(iso);
+  if (ts === null) return "No data yet";
   const mins = Math.max(0, Math.round((now - ts) / 60000));
   if (mins < 1) return "Updated just now";
   if (mins < 60) return `Updated ${mins} min ago`;
@@ -140,6 +147,7 @@ export function formatUpdatedLabel(iso: string | null | undefined, now: number =
   if (days < 7) return `Updated ${days} days ago`;
   return `Updated on ${new Date(ts).toLocaleDateString()}`;
 }
+
 
 
 export type StationDetails = StationWithStatus & {
@@ -162,6 +170,30 @@ export function availableOfferedFuels(station: StationWithStatus): string[] {
   const available = new Set(availableFuels(station));
   return offeredFuels(station).filter((f) => available.has(f));
 }
+
+export type FuelAvailability = { fuel: string; limited: boolean };
+
+/**
+ * Per-fuel live availability for the "Available Now" list.
+ * Each fuel is evaluated independently from its own `live_status` flag; fuels
+ * the station does not offer, and fuels that are unavailable, are excluded.
+ * "Limited" comes from the newest report's coarse fuel status (the only place
+ * that nuance is stored today).
+ */
+export function liveFuelAvailability(station: StationDetails): FuelAvailability[] {
+  const limited = station.latest_report_fuel_status === "limited";
+  const s = station.live_status;
+  if (!s || !s.power_status) return [];
+  const flags: Record<string, boolean> = {
+    CNG: s.cng_available,
+    Petrol: s.petrol_available,
+    Diesel: s.diesel_available,
+  };
+  return offeredFuels(station)
+    .filter((fuel) => flags[fuel])
+    .map((fuel) => ({ fuel, limited }));
+}
+
 
 export async function fetchStationById(id: string): Promise<StationDetails | null> {
   const { data, error } = await supabase
