@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   formatTime,
   formatUpdatedLabel,
@@ -10,6 +9,8 @@ import {
   STATUS_LABELS,
   type StationDetails,
 } from "@/lib/stations";
+
+import { useServerNow } from "@/lib/server-time";
 
 import { Clock, Building2, MapPin, Zap, ZapOff, Users, Fuel } from "lucide-react";
 
@@ -63,22 +64,13 @@ function FuelList({
 }
 
 
-/** Ticks once a minute so relative timestamps stay fresh while the page is open. */
-function useNowTicker(intervalMs = 30_000) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), intervalMs);
-    return () => clearInterval(id);
-  }, [intervalMs]);
-  return now;
-}
 
 export function StationDetailsCard({ station }: { station: StationDetails }) {
   const status = station.live_status;
   const level = statusLevel(station);
   const offered = offeredFuels(station);
   const availableNow = liveFuelAvailability(station);
-  const now = useNowTicker();
+  const now = useServerNow();
 
 
   return (
