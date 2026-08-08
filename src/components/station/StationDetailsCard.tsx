@@ -130,7 +130,7 @@ export function StationDetailsCard({ station }: { station: StationDetails }) {
           <Row
             icon={<Fuel className="size-4" />}
             label="Available now"
-            value={<FuelList fuels={availableNow} limited={isLimited} empty="None right now" />}
+            value={<FuelList fuels={availableNow} empty="None right now" />}
           />
           <Row icon={<Clock className="size-4" />} label="Opening time" value={formatTime(station.open_time)} />
           <Row icon={<Clock className="size-4" />} label="Closing time" value={formatTime(station.close_time)} />
