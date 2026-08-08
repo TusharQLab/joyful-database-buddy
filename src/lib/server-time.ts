@@ -1,0 +1,85 @@
+import { useEffect, useState } from "react";
+
+/**
+ * Clock-skew correction.
+ *
+ * Relative labels ("Updated 3 min ago") are computed against the backend clock,
+ * not the device clock: a browser whose clock is a few minutes/hours off would
+ * otherwise mis-report every timestamp.
+ *
+ * The offset is measured once per session from the `Date` response header of a
+ * cheap request to the backend REST endpoint, compensated for round-trip time.
+ */
+
+let offsetMs = 0;
+let syncPromise: Promise<number> | null = null;
+
+/** Milliseconds to add to `Date.now()` to get backend time. */
+export function getClockOffsetMs(): number {
+  return offsetMs;
+}
+
+/** Current time in backend clock terms. */
+export function serverNow(): number {
+  return Date.now() + offsetMs;
+}
+
+async function measureOffset(): Promise<number> {
+  const url = import.meta.env['VITE_SUPABASE_URL'];
+  const key = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'];
+  if (!url || !key) return 0;
+
+  const sent = Date.now();
+  const res = await fetch(`${url}/rest/v1/`, {
+    method: "HEAD",
+    headers: { apikey: key },
+    cache: "no-store",
+  });
+  const received = Date.now();
+
+  const dateHeader = res.headers.get("date");
+  if (!dateHeader) return 0;
+  const serverTime = new Date(dateHeader).getTime();
+  if (Number.isNaN(serverTime)) return 0;
+
+  // The header was generated somewhere inside the round trip; assume the middle.
+  const localAtServerTime = sent + (received - sent) / 2;
+  return serverTime - localAtServerTime;
+}
+
+/** Measures (once) and caches the client→server clock offset. */
+export function syncServerClock(): Promise<number> {
+  if (typeof window === "undefined") return Promise.resolve(0);
+  if (!syncPromise) {
+    syncPromise = measureOffset()
+      .then((delta) => {
+        // `Date` headers have 1s resolution; ignore sub-second noise.
+        offsetMs = Math.abs(delta) < 1000 ? 0 : delta;
+        return offsetMs;
+      })
+      .catch(() => 0);
+  }
+  return syncPromise;
+}
+
+/**
+ * Backend-corrected "now", refreshed on an interval so relative timestamps
+ * stay fresh while the page is open.
+ */
+export function useServerNow(intervalMs = 30_000): number {
+  const [now, setNow] = useState(() => serverNow());
+
+  useEffect(() => {
+    let active = true;
+    void syncServerClock().then(() => {
+      if (active) setNow(serverNow());
+    });
+    const id = setInterval(() => setNow(serverNow()), intervalMs);
+    return () => {
+      active = false;
+      clearInterval(id);
+    };
+  }, [intervalMs]);
+
+  return now;
+}

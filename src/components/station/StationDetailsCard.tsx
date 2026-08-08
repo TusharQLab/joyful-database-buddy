@@ -63,15 +63,6 @@ function FuelList({
 }
 
 
-/** Ticks once a minute so relative timestamps stay fresh while the page is open. */
-function useNowTicker(intervalMs = 30_000) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), intervalMs);
-    return () => clearInterval(id);
-  }, [intervalMs]);
-  return now;
-}
 
 export function StationDetailsCard({ station }: { station: StationDetails }) {
   const status = station.live_status;
