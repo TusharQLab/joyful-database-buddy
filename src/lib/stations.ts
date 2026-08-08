@@ -171,6 +171,30 @@ export function availableOfferedFuels(station: StationWithStatus): string[] {
   return offeredFuels(station).filter((f) => available.has(f));
 }
 
+export type FuelAvailability = { fuel: string; limited: boolean };
+
+/**
+ * Per-fuel live availability for the "Available Now" list.
+ * Each fuel is evaluated independently from its own `live_status` flag; fuels
+ * the station does not offer, and fuels that are unavailable, are excluded.
+ * "Limited" comes from the newest report's coarse fuel status (the only place
+ * that nuance is stored today).
+ */
+export function liveFuelAvailability(station: StationDetails): FuelAvailability[] {
+  const limited = station.latest_report_fuel_status === "limited";
+  const s = station.live_status;
+  if (!s || !s.power_status) return [];
+  const flags: Record<string, boolean> = {
+    CNG: s.cng_available,
+    Petrol: s.petrol_available,
+    Diesel: s.diesel_available,
+  };
+  return offeredFuels(station)
+    .filter((fuel) => flags[fuel])
+    .map((fuel) => ({ fuel, limited }));
+}
+
+
 export async function fetchStationById(id: string): Promise<StationDetails | null> {
   const { data, error } = await supabase
     .from("stations")
