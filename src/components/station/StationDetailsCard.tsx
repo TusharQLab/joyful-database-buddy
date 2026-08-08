@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   formatTime,
   formatUpdatedLabel,
@@ -10,6 +9,8 @@ import {
   STATUS_LABELS,
   type StationDetails,
 } from "@/lib/stations";
+
+import { useServerNow } from "@/lib/server-time";
 
 import { Clock, Building2, MapPin, Zap, ZapOff, Users, Fuel } from "lucide-react";
 
@@ -69,7 +70,7 @@ export function StationDetailsCard({ station }: { station: StationDetails }) {
   const level = statusLevel(station);
   const offered = offeredFuels(station);
   const availableNow = liveFuelAvailability(station);
-  const now = useNowTicker();
+  const now = useServerNow();
 
 
   return (
