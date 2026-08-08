@@ -77,9 +77,9 @@ export function StationDetailsCard({ station }: { station: StationDetails }) {
   const status = station.live_status;
   const level = statusLevel(station);
   const offered = offeredFuels(station);
-  const availableNow = availableOfferedFuels(station);
-  const isLimited = station.latest_report_fuel_status === "limited";
+  const availableNow = liveFuelAvailability(station);
   const now = useNowTicker();
+
 
   return (
     <article className="mx-auto w-full max-w-2xl">
