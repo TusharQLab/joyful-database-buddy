@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import {
-  availableOfferedFuels,
   formatTime,
   formatUpdatedLabel,
+  liveFuelAvailability,
   offeredFuels,
   queueLabel,
   statusLevel,
@@ -10,6 +10,7 @@ import {
   STATUS_LABELS,
   type StationDetails,
 } from "@/lib/stations";
+
 import { Clock, Building2, MapPin, Zap, ZapOff, Users, Fuel } from "lucide-react";
 
 function Row({
