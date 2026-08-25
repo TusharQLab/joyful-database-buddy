@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, MapPinOff, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StationDetailsCard } from "@/components/station/StationDetailsCard";
 import { ReportStatusForm } from "@/components/station/ReportStatusForm";
+import { FavoriteButton } from "@/components/station/FavoriteButton";
 
 import { stationQueryOptions } from "@/lib/stations";
 
@@ -106,6 +107,9 @@ function StationDetailsPage() {
 
   return (
     <Shell>
+      <div className="mx-auto mb-3 flex w-full max-w-2xl justify-end">
+        <FavoriteButton stationId={stationId} />
+      </div>
       <StationDetailsCard station={data} />
       <ReportStatusForm stationId={stationId} />
     </Shell>
