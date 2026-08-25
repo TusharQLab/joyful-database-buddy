@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Fuel, LogOut } from "lucide-react";
+import { Fuel, LogOut, Star } from "lucide-react";
 import { MapPanel } from "@/components/map/MapPanel";
 import { STATUS_COLORS } from "@/lib/stations";
 
@@ -58,6 +58,12 @@ function AppHome() {
           <h1 className="text-base font-semibold tracking-tight text-foreground">Fuelio</h1>
           <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
         </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/favorites">
+            <Star className="size-4" aria-hidden="true" />
+            <span className="sr-only sm:not-sr-only">My Stations</span>
+          </Link>
+        </Button>
         <Button variant="outline" size="sm" onClick={handleSignOut} disabled={busy}>
           <LogOut className="size-4" aria-hidden="true" />
           <span className="sr-only sm:not-sr-only">{busy ? "Logging out…" : "Log out"}</span>
