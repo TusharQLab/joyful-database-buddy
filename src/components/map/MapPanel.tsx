@@ -1,11 +1,14 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2, MapPinOff, TriangleAlert } from "lucide-react";
 import { stationsQueryOptions } from "@/lib/stations";
+import { stationsAlongRoute } from "@/lib/route";
+import { RouteSearchPanel, type RouteSearchState } from "./RouteSearchPanel";
 
 const StationMap = lazy(() => import("./StationMap"));
+
 
 function Centered({ children }: { children: React.ReactNode }) {
   return (
@@ -29,6 +32,12 @@ function MapLoading() {
 export function MapPanel() {
   const navigate = useNavigate();
   const { data, isPending, isError, error } = useQuery(stationsQueryOptions);
+  const [routeState, setRouteState] = useState<RouteSearchState | null>(null);
+
+  const routeStations = useMemo(() => {
+    if (!routeState || !data) return null;
+    return stationsAlongRoute(data, routeState.route.coordinates);
+  }, [routeState, data]);
 
   if (isPending) return <MapLoading />;
 
@@ -59,15 +68,25 @@ export function MapPanel() {
   }
 
   return (
-    <ClientOnly fallback={<MapLoading />}>
-      <Suspense fallback={<MapLoading />}>
-        <StationMap
-          stations={data}
-          onSelect={(stationId) =>
-            navigate({ to: "/station/$stationId", params: { stationId } })
-          }
-        />
-      </Suspense>
-    </ClientOnly>
+    <>
+      <ClientOnly fallback={<MapLoading />}>
+        <Suspense fallback={<MapLoading />}>
+          <StationMap
+            stations={routeStations ?? data}
+            route={routeState?.route.coordinates ?? null}
+            onSelect={(stationId) =>
+              navigate({ to: "/station/$stationId", params: { stationId } })
+            }
+          />
+        </Suspense>
+      </ClientOnly>
+      <RouteSearchPanel
+        active={routeState}
+        matchedCount={routeStations?.length ?? 0}
+        onResult={setRouteState}
+        onClear={() => setRouteState(null)}
+      />
+    </>
   );
+
 }
