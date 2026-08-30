@@ -51,7 +51,7 @@ export function RouteSearchPanel({
 
   if (!open && !active) {
     return (
-      <div className="pointer-events-auto absolute left-3 right-3 top-3 z-[600] flex justify-start">
+      <div className="pointer-events-auto absolute left-14 right-3 top-3 z-[600] flex justify-start">
         <Button size="sm" onClick={() => setOpen(true)}>
           <RouteIcon className="size-4" aria-hidden="true" />
           Route Search
@@ -61,7 +61,7 @@ export function RouteSearchPanel({
   }
 
   return (
-    <div className="pointer-events-auto absolute left-3 right-3 top-3 z-[600] rounded-xl border border-border bg-card/95 p-3 shadow-md backdrop-blur">
+    <div className="pointer-events-auto absolute left-14 right-3 top-3 z-[600] rounded-xl border border-border bg-card/95 p-3 shadow-md backdrop-blur">
       <div className="mb-2 flex items-center gap-2">
         <RouteIcon className="size-4 text-primary" aria-hidden="true" />
         <h2 className="flex-1 text-sm font-semibold text-card-foreground">Route Search</h2>
