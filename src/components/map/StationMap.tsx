@@ -70,9 +70,11 @@ function markerIcon(color: string) {
 export default function StationMap({
   stations,
   onSelect,
+  route,
 }: {
   stations: StationWithStatus[];
   onSelect?: (stationId: string) => void;
+  route?: [number, number][] | null;
 }) {
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
@@ -80,6 +82,7 @@ export default function StationMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const routeLayerRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -94,12 +97,14 @@ export default function StationMap({
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
     layerRef.current = L.layerGroup().addTo(map);
+    routeLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
 
     return () => {
       map.remove();
       mapRef.current = null;
       layerRef.current = null;
+      routeLayerRef.current = null;
     };
   }, []);
 
@@ -124,10 +129,30 @@ export default function StationMap({
       marker.on("click", () => onSelectRef.current?.(station.id));
     }
 
-    if (points.length) {
+    if (points.length && !route?.length) {
       map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 14 });
     }
-  }, [stations]);
+  }, [stations, route]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const layer = routeLayerRef.current;
+    if (!map || !layer) return;
+
+    layer.clearLayers();
+    if (!route?.length) return;
+
+    L.polyline(route, { color: "#2563eb", weight: 5, opacity: 0.8 }).addTo(layer);
+    const ends: Array<[[number, number], string]> = [
+      [route[0], "#2563eb"],
+      [route[route.length - 1], "#111827"],
+    ];
+    for (const [point, color] of ends) {
+      L.marker(point, { icon: markerIcon(color) }).addTo(layer);
+    }
+    map.fitBounds(L.latLngBounds(route), { padding: [40, 40] });
+  }, [route]);
 
   return <div ref={containerRef} className="h-full w-full" aria-label="Map of fuel stations" />;
 }
+
