@@ -1,11 +1,14 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2, MapPinOff, TriangleAlert } from "lucide-react";
 import { stationsQueryOptions } from "@/lib/stations";
+import { stationsAlongRoute } from "@/lib/route";
+import { RouteSearchPanel, type RouteSearchState } from "./RouteSearchPanel";
 
 const StationMap = lazy(() => import("./StationMap"));
+
 
 function Centered({ children }: { children: React.ReactNode }) {
   return (
