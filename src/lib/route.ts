@@ -29,11 +29,8 @@ export async function geocode(query: string): Promise<GeocodeResult> {
   const rows = (await res.json()) as Array<{ lat: string; lon: string; display_name: string }>;
   if (!rows.length) throw new Error(`No place found for "${q}".`);
 
-  return {
-    lat: Number(rows[0].lat),
-    lng: Number(rows[0].lon),
-    label: rows[0].display_name,
-  };
+  const hit = rows[0]!;
+  return { lat: Number(hit.lat), lng: Number(hit.lon), label: hit.display_name };
 }
 
 export async function fetchRoute(start: LatLng, end: LatLng): Promise<RouteResult> {
@@ -80,8 +77,8 @@ export function stationsAlongRoute(
   if (!coordinates.length) return [];
   const step = Math.max(1, Math.floor(coordinates.length / 400));
   const samples: [number, number][] = [];
-  for (let i = 0; i < coordinates.length; i += step) samples.push(coordinates[i]);
-  samples.push(coordinates[coordinates.length - 1]);
+  for (let i = 0; i < coordinates.length; i += step) samples.push(coordinates[i]!);
+  samples.push(coordinates[coordinates.length - 1]!);
 
   const scored: Array<{ station: StationWithStatus; d: number }> = [];
   for (const station of stations) {

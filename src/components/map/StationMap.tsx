@@ -144,8 +144,8 @@ export default function StationMap({
 
     L.polyline(route, { color: "#2563eb", weight: 5, opacity: 0.8 }).addTo(layer);
     const ends: Array<[[number, number], string]> = [
-      [route[0], "#2563eb"],
-      [route[route.length - 1], "#111827"],
+      [route[0]!, "#2563eb"],
+      [route[route.length - 1]!, "#111827"],
     ];
     for (const [point, color] of ends) {
       L.marker(point, { icon: markerIcon(color) }).addTo(layer);
