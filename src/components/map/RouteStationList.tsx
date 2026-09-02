@@ -18,7 +18,7 @@ export function RouteStationList({
   const now = useServerNow();
 
   return (
-    <div className="pointer-events-auto absolute inset-x-3 bottom-4 z-[550] flex max-h-[45%] flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-md backdrop-blur sm:inset-x-auto sm:bottom-4 sm:left-3 sm:top-40 sm:max-h-none sm:w-72">
+    <div className="pointer-events-auto flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card/95 shadow-md backdrop-blur">
       <div className="border-b border-border px-3 py-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Stations along route ({stations.length})
