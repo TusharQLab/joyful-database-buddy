@@ -6,6 +6,7 @@ import { Loader2, MapPinOff, TriangleAlert } from "lucide-react";
 import { stationsQueryOptions } from "@/lib/stations";
 import { stationsAlongRoute } from "@/lib/route";
 import { RouteSearchPanel, type RouteSearchState } from "./RouteSearchPanel";
+import { RouteStationList } from "./RouteStationList";
 
 const StationMap = lazy(() => import("./StationMap"));
 
@@ -67,6 +68,9 @@ export function MapPanel() {
     );
   }
 
+  const openStation = (stationId: string) =>
+    navigate({ to: "/station/$stationId", params: { stationId } });
+
   return (
     <>
       <ClientOnly fallback={<MapLoading />}>
@@ -74,9 +78,7 @@ export function MapPanel() {
           <StationMap
             stations={routeStations ?? data}
             route={routeState?.route.coordinates ?? null}
-            onSelect={(stationId) =>
-              navigate({ to: "/station/$stationId", params: { stationId } })
-            }
+            onSelect={openStation}
           />
         </Suspense>
       </ClientOnly>
@@ -86,6 +88,9 @@ export function MapPanel() {
         onResult={setRouteState}
         onClear={() => setRouteState(null)}
       />
+      {routeState && routeStations ? (
+        <RouteStationList stations={routeStations} onSelect={openStation} />
+      ) : null}
     </>
   );
 
