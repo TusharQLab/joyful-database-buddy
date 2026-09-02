@@ -72,10 +72,10 @@ function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number) {
 export function stationsAlongRoute(
   stations: StationWithStatus[],
   coordinates: [number, number][],
-  radiusKm = 5,
+  radiusKm = 1.5,
 ): StationWithStatus[] {
   if (!coordinates.length) return [];
-  const step = Math.max(1, Math.floor(coordinates.length / 400));
+  const step = Math.max(1, Math.floor(coordinates.length / 2000));
   const samples: [number, number][] = [];
   for (let i = 0; i < coordinates.length; i += step) samples.push(coordinates[i]!);
   samples.push(coordinates[coordinates.length - 1]!);
