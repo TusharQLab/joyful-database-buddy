@@ -82,15 +82,18 @@ export function MapPanel() {
           />
         </Suspense>
       </ClientOnly>
-      <RouteSearchPanel
-        active={routeState}
-        matchedCount={routeStations?.length ?? 0}
-        onResult={setRouteState}
-        onClear={() => setRouteState(null)}
-      />
-      {routeState && routeStations ? (
-        <RouteStationList stations={routeStations} onSelect={openStation} />
-      ) : null}
+      <div className="pointer-events-none absolute bottom-4 left-14 right-3 top-3 z-[600] flex flex-col gap-2 sm:right-auto sm:w-80">
+        <RouteSearchPanel
+          active={routeState}
+          matchedCount={routeStations?.length ?? 0}
+          onResult={setRouteState}
+          onClear={() => setRouteState(null)}
+        />
+        {routeState && routeStations ? (
+          <RouteStationList stations={routeStations} onSelect={openStation} />
+        ) : null}
+      </div>
+
     </>
   );
 
