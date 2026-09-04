@@ -7,6 +7,8 @@ import { stationsQueryOptions } from "@/lib/stations";
 import { stationsAlongRoute } from "@/lib/route";
 import { RouteSearchPanel, type RouteSearchState } from "./RouteSearchPanel";
 import { RouteStationList } from "./RouteStationList";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 
 const StationMap = lazy(() => import("./StationMap"));
 
@@ -32,8 +34,11 @@ function MapLoading() {
 
 export function MapPanel() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { data, isPending, isError, error } = useQuery(stationsQueryOptions);
   const [routeState, setRouteState] = useState<RouteSearchState | null>(null);
+  const [sheetExpanded, setSheetExpanded] = useState(true);
+
 
   const routeStations = useMemo(() => {
     if (!routeState || !data) return null;
@@ -71,6 +76,44 @@ export function MapPanel() {
   const openStation = (stationId: string) =>
     navigate({ to: "/station/$stationId", params: { stationId } });
 
+  if (isMobile) {
+    return (
+      <>
+        <ClientOnly fallback={<MapLoading />}>
+          <Suspense fallback={<MapLoading />}>
+            <StationMap
+              stations={routeStations ?? data}
+              route={routeState?.route.coordinates ?? null}
+              onSelect={openStation}
+            />
+          </Suspense>
+        </ClientOnly>
+
+        <div className="pointer-events-none absolute left-14 right-3 top-3 z-[600]">
+          <RouteSearchPanel
+            active={routeState}
+            matchedCount={routeStations?.length ?? 0}
+            onResult={setRouteState}
+            onClear={() => setRouteState(null)}
+            compact
+          />
+        </div>
+
+        {routeState && routeStations ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[600]">
+            <RouteStationList
+              stations={routeStations}
+              onSelect={openStation}
+              variant="sheet"
+              expanded={sheetExpanded}
+              onToggle={() => setSheetExpanded((v) => !v)}
+            />
+          </div>
+        ) : null}
+      </>
+    );
+  }
+
   return (
     <>
       <ClientOnly fallback={<MapLoading />}>
@@ -98,3 +141,4 @@ export function MapPanel() {
   );
 
 }
+

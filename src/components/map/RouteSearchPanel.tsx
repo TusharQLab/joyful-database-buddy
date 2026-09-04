@@ -16,17 +16,20 @@ export function RouteSearchPanel({
   matchedCount,
   onResult,
   onClear,
+  compact = false,
 }: {
   active: RouteSearchState | null;
   matchedCount: number;
   onResult: (state: RouteSearchState) => void;
   onClear: () => void;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,7 +63,40 @@ export function RouteSearchPanel({
     );
   }
 
+  if (compact && active) {
+    return (
+      <div className="pointer-events-auto shrink-0 rounded-2xl border border-border bg-card/95 p-3 shadow-md backdrop-blur">
+        <div className="flex items-start gap-2">
+          <RouteIcon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-card-foreground">
+              {active.startLabel.split(",")[0]} → {active.endLabel.split(",")[0]}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {active.route.distanceKm.toFixed(1)} km · ~{Math.round(active.route.durationMin)} min ·{" "}
+              {matchedCount} station{matchedCount === 1 ? "" : "s"}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 shrink-0"
+            onClick={() => {
+              setOpen(false);
+              handleClear();
+            }}
+            aria-label="Clear route"
+          >
+            <X className="size-4" aria-hidden="true" />
+          </Button>
+
+        </div>
+      </div>
+    );
+  }
+
   return (
+
     <div className="pointer-events-auto shrink-0 rounded-xl border border-border bg-card/95 p-3 shadow-md backdrop-blur">
 
       <div className="mb-2 flex items-center gap-2">
