@@ -84,12 +84,12 @@ export function RouteSearchPanel({
             onClick={() => {
               setOpen(false);
               handleClear();
+            }}
             aria-label="Clear route"
           >
             <X className="size-4" aria-hidden="true" />
-
-
           </Button>
+
         </div>
       </div>
     );
