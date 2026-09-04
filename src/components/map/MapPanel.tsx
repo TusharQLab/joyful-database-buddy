@@ -71,6 +71,44 @@ export function MapPanel() {
   const openStation = (stationId: string) =>
     navigate({ to: "/station/$stationId", params: { stationId } });
 
+  if (isMobile) {
+    return (
+      <>
+        <ClientOnly fallback={<MapLoading />}>
+          <Suspense fallback={<MapLoading />}>
+            <StationMap
+              stations={routeStations ?? data}
+              route={routeState?.route.coordinates ?? null}
+              onSelect={openStation}
+            />
+          </Suspense>
+        </ClientOnly>
+
+        <div className="pointer-events-none absolute left-14 right-3 top-3 z-[600]">
+          <RouteSearchPanel
+            active={routeState}
+            matchedCount={routeStations?.length ?? 0}
+            onResult={setRouteState}
+            onClear={() => setRouteState(null)}
+            compact
+          />
+        </div>
+
+        {routeState && routeStations ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[600]">
+            <RouteStationList
+              stations={routeStations}
+              onSelect={openStation}
+              variant="sheet"
+              expanded={sheetExpanded}
+              onToggle={() => setSheetExpanded((v) => !v)}
+            />
+          </div>
+        ) : null}
+      </>
+    );
+  }
+
   return (
     <>
       <ClientOnly fallback={<MapLoading />}>
@@ -98,3 +136,4 @@ export function MapPanel() {
   );
 
 }
+
