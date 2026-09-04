@@ -81,10 +81,11 @@ export function RouteSearchPanel({
             variant="ghost"
             size="icon"
             className="size-7 shrink-0"
-            onClick={handleClear}
-            aria-label="Clear route"
-          >
-            <X className="size-4" aria-hidden="true" />
+            onClick={() => {
+              setOpen(false);
+              handleClear();
+            }}
+
           </Button>
         </div>
       </div>
