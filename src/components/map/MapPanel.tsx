@@ -7,6 +7,8 @@ import { stationsQueryOptions } from "@/lib/stations";
 import { stationsAlongRoute } from "@/lib/route";
 import { RouteSearchPanel, type RouteSearchState } from "./RouteSearchPanel";
 import { RouteStationList } from "./RouteStationList";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 
 const StationMap = lazy(() => import("./StationMap"));
 
