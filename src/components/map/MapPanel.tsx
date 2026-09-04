@@ -32,8 +32,11 @@ function MapLoading() {
 
 export function MapPanel() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { data, isPending, isError, error } = useQuery(stationsQueryOptions);
   const [routeState, setRouteState] = useState<RouteSearchState | null>(null);
+  const [sheetExpanded, setSheetExpanded] = useState(true);
+
 
   const routeStations = useMemo(() => {
     if (!routeState || !data) return null;
