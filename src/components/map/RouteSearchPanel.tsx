@@ -16,17 +16,20 @@ export function RouteSearchPanel({
   matchedCount,
   onResult,
   onClear,
+  compact = false,
 }: {
   active: RouteSearchState | null;
   matchedCount: number;
   onResult: (state: RouteSearchState) => void;
   onClear: () => void;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
