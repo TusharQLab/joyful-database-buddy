@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Fuel, Loader2, MailCheck } from "lucide-react";
+import { getManagerAccess } from "@/lib/manager.functions";
+
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
