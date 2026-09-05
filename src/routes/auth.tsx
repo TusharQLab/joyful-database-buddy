@@ -73,10 +73,23 @@ function AuthPage() {
     if (saved) setEmail(saved);
   }, []);
 
-  // Already authenticated → straight into the app.
+  // Already authenticated → managers land in the manager area, drivers in the app.
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/app", replace: true });
+    if (loading || !session) return;
+    let cancelled = false;
+    getManagerAccess()
+      .then((access) => {
+        if (cancelled) return;
+        navigate({ to: access.isManager ? "/manager" : "/app", replace: true });
+      })
+      .catch(() => {
+        if (!cancelled) navigate({ to: "/app", replace: true });
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [loading, session, navigate]);
+
 
   useEffect(() => {
     return () => {
