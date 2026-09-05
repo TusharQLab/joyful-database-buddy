@@ -134,6 +134,88 @@ export type Database = {
           },
         ]
       }
+      station_confidence: {
+        Row: {
+          agreement_rate: number | null
+          confidence_score: number
+          created_at: string
+          id: string
+          last_calculated_at: string | null
+          last_report_at: string | null
+          report_count: number
+          station_id: string
+          updated_at: string
+        }
+        Insert: {
+          agreement_rate?: number | null
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          last_calculated_at?: string | null
+          last_report_at?: string | null
+          report_count?: number
+          station_id: string
+          updated_at?: string
+        }
+        Update: {
+          agreement_rate?: number | null
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          last_calculated_at?: string | null
+          last_report_at?: string | null
+          report_count?: number
+          station_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "station_confidence_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: true
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      station_managers: {
+        Row: {
+          approved: boolean
+          assigned_at: string
+          created_at: string
+          id: string
+          station_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved?: boolean
+          assigned_at?: string
+          created_at?: string
+          id?: string
+          station_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved?: boolean
+          assigned_at?: string
+          created_at?: string
+          id?: string
+          station_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "station_managers_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stations: {
         Row: {
           city: string | null
@@ -176,11 +258,43 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      manages_station: {
+        Args: { _station_id: string; _user_id: string }
+        Returns: boolean
+      }
       reset_demo_live_status: { Args: never; Returns: number }
       simulate_station_activity: {
         Args: { p_fraction?: number }
@@ -188,7 +302,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "driver"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -315,6 +429,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "driver"],
+    },
   },
 } as const
