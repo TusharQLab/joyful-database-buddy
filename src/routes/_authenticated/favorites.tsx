@@ -12,6 +12,7 @@ import {
   STATUS_LABELS,
 } from "@/lib/stations";
 import { useServerNow } from "@/lib/server-time";
+import { useManagerGuard } from "@/hooks/useManagerGuard";
 
 export const Route = createFileRoute("/_authenticated/favorites")({
   head: () => ({
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/_authenticated/favorites")({
 });
 
 function FavoritesPage() {
+  useManagerGuard();
   const { data, isPending, isError, error } = useQuery(favoriteStationsQueryOptions);
   const now = useServerNow();
 
