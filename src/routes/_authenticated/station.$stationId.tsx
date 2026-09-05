@@ -7,6 +7,7 @@ import { ReportStatusForm } from "@/components/station/ReportStatusForm";
 import { FavoriteButton } from "@/components/station/FavoriteButton";
 
 import { stationQueryOptions } from "@/lib/stations";
+import { useManagerGuard } from "@/hooks/useManagerGuard";
 
 export const Route = createFileRoute("/_authenticated/station/$stationId")({
   head: () => ({
@@ -67,6 +68,7 @@ function Message({
 }
 
 function StationDetailsPage() {
+  useManagerGuard();
   const { stationId } = Route.useParams();
   const { data, isPending, isError, error } = useQuery(stationQueryOptions(stationId));
 

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Fuel, LogOut, Star } from "lucide-react";
 import { MapPanel } from "@/components/map/MapPanel";
 import { STATUS_COLORS } from "@/lib/stations";
+import { useManagerGuard } from "@/hooks/useManagerGuard";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({
@@ -35,6 +36,7 @@ const LEGEND = [
 ];
 
 function AppHome() {
+  useManagerGuard();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
