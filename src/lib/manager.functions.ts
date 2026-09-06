@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { LiveStatus, StationDetails } from "@/lib/stations";
 
 export type ManagerAccess = {
   isManager: boolean;
