@@ -198,6 +198,7 @@ function ManagerStationView({ stationName }: { stationName: string }) {
   return (
     <ManagerShell stationName={stationName}>
       <ManagerStationCard station={data} isRefreshing={isFetching} onRefresh={() => refetch()} />
+      <ManagerReportForm />
     </ManagerShell>
   );
 }
