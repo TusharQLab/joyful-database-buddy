@@ -93,6 +93,7 @@ export type Database = {
           power_status: boolean
           queue_minutes: number | null
           queue_status: string
+          source: string
           station_id: string
           status: string
           updated_at: string
@@ -106,6 +107,7 @@ export type Database = {
           power_status?: boolean
           queue_minutes?: number | null
           queue_status?: string
+          source?: string
           station_id: string
           status: string
           updated_at?: string
@@ -119,6 +121,7 @@ export type Database = {
           power_status?: boolean
           queue_minutes?: number | null
           queue_status?: string
+          source?: string
           station_id?: string
           status?: string
           updated_at?: string
