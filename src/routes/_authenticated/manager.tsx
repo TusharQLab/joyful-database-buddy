@@ -30,6 +30,7 @@ import {
   type StationDetails,
 } from "@/lib/stations";
 import { useServerNow } from "@/lib/server-time";
+import { ManagerReportForm } from "@/components/manager/ManagerReportForm";
 
 export const Route = createFileRoute("/_authenticated/manager")({
   head: () => ({
@@ -198,6 +199,7 @@ function ManagerStationView({ stationName }: { stationName: string }) {
   return (
     <ManagerShell stationName={stationName}>
       <ManagerStationCard station={data} isRefreshing={isFetching} onRefresh={() => refetch()} />
+      <ManagerReportForm />
     </ManagerShell>
   );
 }
