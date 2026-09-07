@@ -93,6 +93,7 @@ export async function fetchMyLatestReport(
     .select("*")
     .eq("station_id", stationId)
     .eq("user_id", userId)
+    .eq("source", "driver")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
