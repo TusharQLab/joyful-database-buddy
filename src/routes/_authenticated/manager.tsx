@@ -30,6 +30,7 @@ import {
   type StationDetails,
 } from "@/lib/stations";
 import { useServerNow } from "@/lib/server-time";
+import { ManagerReportForm } from "@/components/manager/ManagerReportForm";
 
 export const Route = createFileRoute("/_authenticated/manager")({
   head: () => ({
