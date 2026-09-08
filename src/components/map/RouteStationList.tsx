@@ -16,12 +16,14 @@ export function RouteStationList({
   variant = "panel",
   expanded = true,
   onToggle,
+  title = "Stations along route",
 }: {
   stations: StationWithStatus[];
   onSelect: (stationId: string) => void;
   variant?: "panel" | "sheet";
   expanded?: boolean;
   onToggle?: () => void;
+  title?: string;
 }) {
   const now = useServerNow();
   const isSheet = variant === "sheet";
