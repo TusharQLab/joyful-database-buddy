@@ -5,8 +5,10 @@ import { useNavigate } from "@tanstack/react-router";
 import { Loader2, MapPinOff, TriangleAlert } from "lucide-react";
 import { stationsQueryOptions } from "@/lib/stations";
 import { stationsAlongRoute } from "@/lib/route";
+import { parseStationQuery, searchStations, type SearchOrigin } from "@/lib/station-search";
 import { RouteSearchPanel, type RouteSearchState } from "./RouteSearchPanel";
 import { RouteStationList } from "./RouteStationList";
+import { StationSearchPanel } from "./StationSearchPanel";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 
@@ -38,12 +40,23 @@ export function MapPanel() {
   const { data, isPending, isError, error } = useQuery(stationsQueryOptions);
   const [routeState, setRouteState] = useState<RouteSearchState | null>(null);
   const [sheetExpanded, setSheetExpanded] = useState(true);
+  const [query, setQuery] = useState("");
+  const [origin, setOrigin] = useState<SearchOrigin>(null);
 
 
   const routeStations = useMemo(() => {
     if (!routeState || !data) return null;
     return stationsAlongRoute(data, routeState.route.coordinates);
   }, [routeState, data]);
+
+  const base = routeStations ?? data ?? [];
+  const searchActive = query.trim().length > 0;
+  const needsLocation = parseStationQuery(query).radiusKm !== null;
+
+  const searchResults = useMemo(
+    () => (searchActive ? searchStations(base, query, origin) : null),
+    [searchActive, base, query, origin],
+  );
 
   if (isPending) return <MapLoading />;
 
@@ -76,20 +89,34 @@ export function MapPanel() {
   const openStation = (stationId: string) =>
     navigate({ to: "/station/$stationId", params: { stationId } });
 
+  const shown = searchResults ?? base;
+
+  const searchBar = (
+    <StationSearchPanel
+      query={query}
+      onQueryChange={setQuery}
+      needsLocation={needsLocation}
+      origin={origin}
+      onOrigin={setOrigin}
+      resultCount={searchResults ? searchResults.length : null}
+    />
+  );
+
   if (isMobile) {
     return (
       <>
         <ClientOnly fallback={<MapLoading />}>
           <Suspense fallback={<MapLoading />}>
             <StationMap
-              stations={routeStations ?? data}
+              stations={shown}
               route={routeState?.route.coordinates ?? null}
               onSelect={openStation}
             />
           </Suspense>
         </ClientOnly>
 
-        <div className="pointer-events-none absolute left-14 right-3 top-3 z-[600]">
+        <div className="pointer-events-none absolute left-14 right-3 top-3 z-[600] flex flex-col gap-2">
+          {searchBar}
           <RouteSearchPanel
             active={routeState}
             matchedCount={routeStations?.length ?? 0}
@@ -99,14 +126,15 @@ export function MapPanel() {
           />
         </div>
 
-        {routeState && routeStations ? (
+        {searchActive || (routeState && routeStations) ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[600]">
             <RouteStationList
-              stations={routeStations}
+              stations={shown}
               onSelect={openStation}
               variant="sheet"
               expanded={sheetExpanded}
               onToggle={() => setSheetExpanded((v) => !v)}
+              title={searchActive ? "Search results" : "Stations along route"}
             />
           </div>
         ) : null}
@@ -119,21 +147,26 @@ export function MapPanel() {
       <ClientOnly fallback={<MapLoading />}>
         <Suspense fallback={<MapLoading />}>
           <StationMap
-            stations={routeStations ?? data}
+            stations={shown}
             route={routeState?.route.coordinates ?? null}
             onSelect={openStation}
           />
         </Suspense>
       </ClientOnly>
       <div className="pointer-events-none absolute bottom-4 left-14 right-3 top-3 z-[600] flex flex-col gap-2 sm:right-auto sm:w-80">
+        {searchBar}
         <RouteSearchPanel
           active={routeState}
           matchedCount={routeStations?.length ?? 0}
           onResult={setRouteState}
           onClear={() => setRouteState(null)}
         />
-        {routeState && routeStations ? (
-          <RouteStationList stations={routeStations} onSelect={openStation} />
+        {searchActive || (routeState && routeStations) ? (
+          <RouteStationList
+            stations={shown}
+            onSelect={openStation}
+            title={searchActive ? "Search results" : "Stations along route"}
+          />
         ) : null}
       </div>
 
@@ -141,4 +174,3 @@ export function MapPanel() {
   );
 
 }
-
