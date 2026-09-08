@@ -261,6 +261,53 @@ export type Database = {
         }
         Relationships: []
       }
+      status_confidence: {
+        Row: {
+          calculated_at: string
+          confidence: number
+          created_at: string
+          data_type: string
+          id: string
+          numeric_value: number | null
+          report_count: number
+          station_id: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          calculated_at?: string
+          confidence?: number
+          created_at?: string
+          data_type: string
+          id?: string
+          numeric_value?: number | null
+          report_count?: number
+          station_id: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          calculated_at?: string
+          confidence?: number
+          created_at?: string
+          data_type?: string
+          id?: string
+          numeric_value?: number | null
+          report_count?: number
+          station_id?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_confidence_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -298,10 +345,30 @@ export type Database = {
         Args: { _station_id: string; _user_id: string }
         Returns: boolean
       }
+      recompute_all_station_status: { Args: never; Returns: number }
+      recompute_station_status: {
+        Args: { p_station_id: string }
+        Returns: undefined
+      }
+      report_freshness: { Args: { p_ts: string }; Returns: number }
       reset_demo_live_status: { Args: never; Returns: number }
       simulate_station_activity: {
         Args: { p_fraction?: number }
         Returns: number
+      }
+      weighted_reports: {
+        Args: { p_station_id: string }
+        Returns: {
+          fresh: number
+          fuel_status: string
+          power_status: boolean
+          queue_minutes: number
+          queue_status: string
+          source: string
+          user_id: string
+          w_avail: number
+          w_queue: number
+        }[]
       }
     }
     Enums: {
