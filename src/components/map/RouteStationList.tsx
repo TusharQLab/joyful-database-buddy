@@ -47,7 +47,7 @@ export function RouteStationList({
           <span className="h-1.5 w-10 rounded-full bg-muted-foreground/30" aria-hidden="true" />
           <span className="flex w-full items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Stations along route ({stations.length})
+              {title} ({stations.length})
             </span>
             {expanded ? (
               <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
@@ -59,7 +59,7 @@ export function RouteStationList({
       ) : (
         <div className="border-b border-border px-3 py-2">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Stations along route ({stations.length})
+            {title} ({stations.length})
           </h3>
         </div>
       )}
