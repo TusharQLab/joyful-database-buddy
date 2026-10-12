@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import {
   Building2,
@@ -17,7 +16,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { getManagerAccess, getManagerStation, type ManagerAccess } from "@/lib/manager.functions";
+import type { ManagerAccess } from "@/lib/manager.functions";
+import { getManagerAccess, getManagerStation } from "@/lib/manager-data";
 import {
   formatTime,
   formatUpdatedLabel,
@@ -166,7 +166,7 @@ function ManagerArea() {
 }
 
 function ManagerStationView({ stationName }: { stationName: string }) {
-  const fetchStation = useServerFn(getManagerStation);
+  const fetchStation = getManagerStation;
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["manager-station"],
     queryFn: () => fetchStation(),
