@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { getManagerAccess } from "@/lib/manager.functions";
+import { getManagerAccess } from "@/lib/manager.client";
 
 /**
  * Keeps managers inside the manager area. Drivers are unaffected: the query
@@ -10,7 +9,7 @@ import { getManagerAccess } from "@/lib/manager.functions";
  */
 export function useManagerGuard() {
   const navigate = useNavigate();
-  const fetchAccess = useServerFn(getManagerAccess);
+  const fetchAccess = getManagerAccess;
   const { data } = useQuery({
     queryKey: ["manager-access"],
     queryFn: () => fetchAccess(),

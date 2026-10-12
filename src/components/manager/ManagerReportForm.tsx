@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { getMyManagerReport, submitManagerReport } from "@/lib/manager.functions";
+import { getMyManagerReport, submitManagerReport } from "@/lib/manager.client";
 
 const FUELS = ["CNG", "Petrol", "Diesel"] as const;
 type Fuel = (typeof FUELS)[number];
@@ -57,8 +56,8 @@ function Chip({
 /** Official station update, restricted by the database to the manager's own station. */
 export function ManagerReportForm() {
   const queryClient = useQueryClient();
-  const fetchMine = useServerFn(getMyManagerReport);
-  const submit = useServerFn(submitManagerReport);
+  const fetchMine = getMyManagerReport;
+  const submit = submitManagerReport;
 
   const [selectedFuels, setSelectedFuels] = useState<FuelKey[]>([]);
   const [fuelStatuses, setFuelStatuses] = useState<Partial<Record<FuelKey, FuelStatus>>>({});
