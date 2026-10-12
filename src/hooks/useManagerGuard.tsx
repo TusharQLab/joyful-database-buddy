@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { getManagerAccess } from "@/lib/manager.client";
+import { getManagerAccess } from "@/lib/manager-data";
 
 /**
  * Keeps managers inside the manager area. Drivers are unaffected: the query
