@@ -37,8 +37,8 @@ export async function getManagerAccess(): Promise<ManagerAccess> {
     .eq("user_id", userId);
   if (error) throw error;
   if (!assignments?.length) return { isManager: true, station: null, pendingApproval: false };
-  const assignment = assignments.find((a) => a.approved) ?? assignments[0];
-  if (!assignment.approved) return { isManager: true, station: null, pendingApproval: true };
+  const assignment = assignments.find((a) => a.approved);
+  if (!assignment) return { isManager: true, station: null, pendingApproval: true };
   const { data: s, error: stationError } = await supabase
     .from("stations")
     .select("id, name, city, company")
