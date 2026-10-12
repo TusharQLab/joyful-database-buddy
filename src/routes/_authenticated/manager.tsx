@@ -49,13 +49,14 @@ export const Route = createFileRoute("/_authenticated/manager")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  ssr: false,
   loader: async (): Promise<ManagerAccess> => getManagerAccess(),
   component: ManagerArea,
-  errorComponent: () => (
+  errorComponent: ({ error }) => (
     <ManagerShell>
       <Blocked
         title="Manager area unavailable"
-        message="We couldn't check your manager access right now. Please try again in a moment."
+        message={`We couldn't check your manager access right now. Please refresh the page. (${error instanceof Error ? error.message : "Unknown error"})`}
       />
     </ManagerShell>
   ),

@@ -31,15 +31,20 @@ export async function getManagerAccess(): Promise<ManagerAccess> {
   if (rolesError) throw rolesError;
   if (!roles?.length) return { isManager: false, station: null, pendingApproval: false };
 
-  const { data: assignment, error } = await supabase
+  const { data: assignments, error } = await supabase
     .from("station_managers")
-    .select("station_id, approved, stations(id, name, city, company)")
-    .eq("user_id", userId)
-    .maybeSingle();
+    .select("station_id, approved")
+    .eq("user_id", userId);
   if (error) throw error;
-  if (!assignment) return { isManager: true, station: null, pendingApproval: false };
+  if (!assignments?.length) return { isManager: true, station: null, pendingApproval: false };
+  const assignment = assignments.find((a) => a.approved) ?? assignments[0];
   if (!assignment.approved) return { isManager: true, station: null, pendingApproval: true };
-  const s = assignment.stations as unknown as ManagerAccess["station"];
+  const { data: s, error: stationError } = await supabase
+    .from("stations")
+    .select("id, name, city, company")
+    .eq("id", assignment.station_id)
+    .maybeSingle();
+  if (stationError) throw stationError;
   return { isManager: true, station: s ? { id: s.id, name: s.name, city: s.city, company: s.company } : null, pendingApproval: false };
 }
 
