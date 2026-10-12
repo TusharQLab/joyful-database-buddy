@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import type { ManagerAccess } from "@/lib/manager.functions";
-import { getManagerAccess, getManagerStation } from "@/lib/manager.client";
+import { getManagerAccess, getManagerStation } from "@/lib/manager-data";
 import {
   formatTime,
   formatUpdatedLabel,

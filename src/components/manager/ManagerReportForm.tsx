@@ -5,7 +5,7 @@ import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { getMyManagerReport, submitManagerReport } from "@/lib/manager.client";
+import { getMyManagerReport, submitManagerReport } from "@/lib/manager-data";
 
 const FUELS = ["CNG", "Petrol", "Diesel"] as const;
 type Fuel = (typeof FUELS)[number];
