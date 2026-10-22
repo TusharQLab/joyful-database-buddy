@@ -196,7 +196,8 @@ export function MapPanel() {
           />
         </Suspense>
       </ClientOnly>
-      <div className="pointer-events-none absolute bottom-4 left-14 right-3 top-3 z-[600] flex flex-col gap-2 sm:right-auto sm:w-80">
+      <div className="pointer-events-none absolute bottom-4 left-14 right-3 top-3 z-[600] flex flex-col items-start gap-2 sm:right-auto sm:w-80">
+        <CityToggle city={city} onCity={setCity} />
         {searchBar}
         <RouteSearchPanel
           active={routeState}
