@@ -1,9 +1,9 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2, MapPinOff, TriangleAlert } from "lucide-react";
-import { stationsQueryOptions } from "@/lib/stations";
+import { stationsQueryOptions, type StationWithStatus } from "@/lib/stations";
 import { stationsAlongRoute } from "@/lib/route";
 import { parseStationQuery, searchStations, type SearchOrigin } from "@/lib/station-search";
 import { RouteSearchPanel, type RouteSearchState } from "./RouteSearchPanel";
@@ -13,6 +13,39 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 
 const StationMap = lazy(() => import("./StationMap"));
+
+type CityKey = "delhi" | "mumbai";
+
+function CityToggle({ city, onCity }: { city: CityKey; onCity: (city: CityKey) => void }) {
+  const options: Array<{ key: CityKey; label: string }> = [
+    { key: "delhi", label: "Delhi NCR" },
+    { key: "mumbai", label: "Mumbai" },
+  ];
+  return (
+    <div
+      className="pointer-events-auto inline-flex shrink-0 self-start rounded-full border border-border bg-card/95 p-1 shadow-md backdrop-blur"
+      role="tablist"
+      aria-label="Select city"
+    >
+      {options.map((option) => (
+        <button
+          key={option.key}
+          type="button"
+          role="tab"
+          aria-selected={city === option.key}
+          onClick={() => onCity(option.key)}
+          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            city === option.key
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 
 function Centered({ children }: { children: React.ReactNode }) {
