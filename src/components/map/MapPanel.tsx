@@ -75,14 +75,23 @@ export function MapPanel() {
   const [sheetExpanded, setSheetExpanded] = useState(true);
   const [query, setQuery] = useState("");
   const [origin, setOrigin] = useState<SearchOrigin>(null);
+  const [city, setCity] = useState<CityKey>("delhi");
 
+  const inCity = useCallback(
+    (station: StationWithStatus) =>
+      city === "mumbai" ? station.city === "Mumbai" : station.city !== "Mumbai",
+    [city],
+  );
 
   const routeStations = useMemo(() => {
     if (!routeState || !data) return null;
-    return stationsAlongRoute(data, routeState.route.coordinates);
-  }, [routeState, data]);
+    return stationsAlongRoute(data, routeState.route.coordinates).filter(inCity);
+  }, [routeState, data, inCity]);
 
-  const base = routeStations ?? data ?? [];
+  const base = useMemo(
+    () => (routeStations ?? data ?? []).filter(inCity),
+    [routeStations, data, inCity],
+  );
   const searchActive = query.trim().length > 0;
   const needsLocation = parseStationQuery(query).radiusKm !== null;
 
